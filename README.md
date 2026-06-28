@@ -1,6 +1,6 @@
 <p align="center">
+  <img src="https://img.shields.io/github/v/release/mobogreatthegreat/Reuse-Hub?include_prereleases&style=flat-square&color=blueviolet"/>
   <picture>
-    <img src="https://img.shields.io/github/v/release/mobogreatthegreat/Reuse-Hub?include_prereleases&style=flat-square&color=blueviolet"/>
     <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square&logo=python&logoColor=white&labelColor=1a1a2e">
     <img src="https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square&logo=python">
   </picture>
