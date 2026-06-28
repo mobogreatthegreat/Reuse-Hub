@@ -11,10 +11,14 @@ where python >nul 2>&1 || (ECHO [!] Python not found. & PAUSE & EXIT /B 1)
 python -c "import PyInstaller" 2>nul || (ECHO [*] Installing PyInstaller... & python -m pip install pyinstaller --quiet)
 where node >nul 2>&1 || (ECHO [!] Node.js not found. & PAUSE & EXIT /B 1)
 
-REM ---- Clean ----
-IF EXIST "dist" rmdir /s /q "dist" 2>nul
-IF EXIST "dist-backend" rmdir /s /q "dist-backend" 2>nul
-IF EXIST "build" rmdir /s /q "build" 2>nul
+REM ---- Kill lingering processes ----
+taskkill /F /IM electron.exe >nul 2>&1
+taskkill /F /IM "Reuse Hub.exe" >nul 2>&1
+taskkill /F /IM reuse-hub-backend.exe >nul 2>&1
+timeout /t 2 /nobreak >nul
+
+REM ---- Clean (retry loop for locked files) ----
+powershell -Command "$retry=0; while($retry -lt 5){try{Remove-Item -Recurse -Force 'dist','build','dist-backend' -ErrorAction Stop; break}catch{Start-Sleep 1; $retry++}}"
 
 REM ---- Step 1: Python backend ----
 ECHO.
@@ -31,92 +35,48 @@ python -m PyInstaller --noconfirm --onefile --console --name "reuse-hub-backend"
   --hidden-import "fastapi.routing" --hidden-import "fastapi.openapi" ^
   --hidden-import "anyio" --hidden-import "sniffio" ^
   --hidden-import "httpx" --hidden-import "multipart" ^
-  --add-data "backend\db.py;." --add-data "backend\launcher.py;." ^
-  "backend\server.py"
+  --add-data "db.py;." --add-data "launcher.py;." ^
+  "server.py"
 IF %ERRORLEVEL% NEQ 0 (ECHO [!] Backend build failed & PAUSE & EXIT /B 1)
 ECHO  [+] dist-backend\reuse-hub-backend.exe
 
-REM ---- Step 2: Electron portable exe ----
+REM ---- Step 2: Electron portable build ----
 ECHO.
-ECHO  [2/2] Building Reuse Hub portable exe ...
+ECHO  [2/2] Building Reuse Hub portable ...
 
 REM ----- Install npm dependencies if needed -----
-IF NOT EXIST "node_modules\.package-lock.json" (
+IF NOT EXIST "src-electron\node_modules\.package-lock.json" (
   ECHO  [*] Installing npm dependencies...
+  pushd src-electron
   call npm install
+  popd
   IF !ERRORLEVEL! NEQ 0 (ECHO [!] npm install failed & PAUSE & EXIT /B 1)
   ECHO  [+] npm dependencies installed
 )
 
-REM ----- Download 7z SFX module if needed -----
-SET "SFX_MODULE=node_modules\7zip-bin\win\x64\7zCon.sfx"
-IF NOT EXIST "%SFX_MODULE%" (
-  ECHO  [*] Downloading 7z SFX module...
-  powershell -Command "Invoke-WebRequest -Uri 'https://www.7-zip.org/a/7z2107-extra.7z' -OutFile '%TEMP%\7z-extra.7z' -UseBasicParsing" >nul
-  IF EXIST "%TEMP%\7z-extra.7z" (
-    "node_modules\7zip-bin\win\x64\7za.exe" x -bd "%TEMP%\7z-extra.7z" -o"%TEMP%\7z-extra" -y >nul
-    IF EXIST "%TEMP%\7z-extra\7zCon.sfx" (
-      copy "%TEMP%\7z-extra\7zCon.sfx" "%SFX_MODULE%" >nul
-      ECHO  [+] SFX module ready
-    )
-    rmdir /s /q "%TEMP%\7z-extra" 2>nul
-    DEL "%TEMP%\7z-extra.7z" 2>nul
-  )
-)
-
-REM ----- Kill lingering electron processes -----
-taskkill /F /IM electron.exe >nul 2>&1
-taskkill /F /IM "Reuse Hub.exe" >nul 2>&1
-
-REM ----- Build unpacked app (no signing needed) -----
-ECHO  [*] Packaging Electron app...
+REM ----- Electron builder (portable) -----
+pushd src-electron
+ECHO  [*] Running electron-builder...
 set CSC_IDENTITY_AUTO_DISCOVERY=false
-call npx electron-builder --win dir
+call npx.cmd electron-builder --win portable --x64
 IF !ERRORLEVEL! NEQ 0 (
   ECHO  [!] electron-builder failed
+  popd
   PAUSE
   EXIT /B !ERRORLEVEL!
 )
+popd
 
-REM ----- Create single-file portable exe using 7z SFX -----
-ECHO  [*] Creating single-file portable exe...
-IF NOT EXIST "%SFX_MODULE%" (
-  ECHO  [!] SFX module not found - dist\win-unpacked\ works as-is
-  GOTO done
-)
-
-IF EXIST "dist\Reuse Hub.exe" DEL "dist\Reuse Hub.exe" 2>nul
-
-REM Create SFX config file
-ECHO ;!@Install@!UTF-8! > "%TEMP%\sfx-config.txt"
-ECHO RunProgram="Reuse Hub.exe" >> "%TEMP%\sfx-config.txt"
-ECHO Directory="%%T" >> "%TEMP%\sfx-config.txt"
-ECHO ;!@InstallEnd@! >> "%TEMP%\sfx-config.txt"
-
-cd dist
-"..\node_modules\7zip-bin\win\x64\7za.exe" a -sfx"..\%SFX_MODULE%" -mx9 ^
-  -z"%TEMP%\sfx-config.txt" "Reuse Hub.exe" "win-unpacked\*" >nul
-cd ..
-
-IF %ERRORLEVEL% NEQ 0 (
-  ECHO  [!] 7z SFX failed - dist\win-unpacked\ works as-is
-) ELSE (
-  IF EXIST "dist\Reuse Hub.exe" (
-    ECHO  [+] dist\Reuse Hub.exe
-    rmdir /s /q "dist\win-unpacked" 2>nul
-  )
-)
-
-:done
+REM ---- Verify outputs ----
 ECHO.
 ECHO  --- Build Complete --------------------------------
 ECHO.
 for /f "tokens=*" %%f in ('dir /b "dist\*.exe" 2^>nul') do (
   ECHO  [+] dist\%%f
 )
-IF EXIST "dist\win-unpacked" ECHO  [+] dist\win-unpacked\Reuse Hub.exe (folder)
+IF EXIST "dist\win-unpacked" ECHO  [+] dist\win-unpacked\Reuse Hub.exe (no extraction)
 ECHO.
-ECHO  Reuse Hub.exe is a single portable file.
-ECHO  It contains everything -- just run it anywhere.
+ECHO  Run from win-unpacked\ for instant launch,
+ECHO  or distribute the portable *.exe.
 ECHO.
 PAUSE

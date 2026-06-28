@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reuse Hub</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header id="titlebar">
+      <div id="titlebar-drag">
+        <button id="btn-add" class="btn-icon" title="Add item (Ctrl+N)">+</button>
+        <span id="title">Reuse Hub</span>
+      </div>
+      <div id="titlebar-controls">
+        <button class="win-btn" id="btn-minimize" title="Minimize">─</button>
+        <button class="win-btn" id="btn-maximize" title="Maximize">□</button>
+        <button class="win-btn win-close" id="btn-close" title="Close">✕</button>
+      </div>
+    </header>
+
+    <div id="toolbar">
+      <div id="toolbar-left">
+        <input type="text" id="search" placeholder="Search items..." spellcheck="false" />
+      </div>
+      <div id="toolbar-right">
+        <div class="view-toggle">
+          <button id="btn-grid" class="btn-icon active" title="Grid view">▦</button>
+          <button id="btn-list" class="btn-icon" title="List view">☰</button>
+        </div>
+      </div>
+    </div>
+
+    <nav id="categories-bar">
+      <button class="cat-tab active" data-cat="__all__">All</button>
+      <div id="cat-list"></div>
+      <button id="btn-manage-cats" class="btn-icon cat-manage-btn" title="Manage Categories">✎</button>
+    </nav>
+
+    <main id="content" class="view-grid"></main>
+
+    <div id="toast-container"></div>
+  </div>
+
+  <div id="modal-overlay" class="hidden">
+    <div id="modal">
+      <div id="modal-header">
+        <h2 id="modal-title">Add Item</h2>
+        <button id="modal-close" class="btn-icon">&times;</button>
+      </div>
+      <form id="item-form">
+        <input type="hidden" id="edit-id" />
+
+        <label for="item-name">Name</label>
+        <input type="text" id="item-name" required placeholder="e.g. Spotify" />
+
+        <label for="item-type">Type</label>
+        <div class="select-wrap">
+          <select id="item-type" required>
+            <option value="link">Link (website)</option>
+            <option value="executable">Executable (app/game)</option>
+            <option value="console">Console Command</option>
+          </select>
+        </div>
+
+        <div id="field-path">
+          <label for="item-path">Path / URL</label>
+          <div class="input-row">
+            <input type="text" id="item-path" required placeholder="e.g. https://spotify.com" />
+            <button type="button" id="btn-browse" class="btn-secondary" title="Browse for executable">Browse</button>
+          </div>
+        </div>
+
+        <div id="field-browser" class="hidden">
+          <label for="item-browser">Browser (optional)</label>
+          <input type="text" id="item-browser" placeholder="e.g. chrome, firefox, or full path" />
+        </div>
+
+        <div id="field-console-mode" class="hidden">
+          <label class="checkbox-label">
+            <input type="checkbox" id="item-console-terminal" checked />
+            <span>Show terminal window when running</span>
+          </label>
+        </div>
+
+        <label for="item-icon">Icon Image</label>
+        <div class="input-row">
+          <input type="text" id="item-icon" placeholder="Path to image file (leave empty for default)" />
+          <button type="button" id="btn-icon-browse" class="btn-secondary" title="Browse for image">Browse</button>
+          <button type="button" id="btn-icon-clear" class="btn-secondary" title="Clear icon">Clear</button>
+        </div>
+
+        <label for="item-category">Category</label>
+        <div class="select-wrap">
+          <select id="item-category">
+            <option value="Uncategorized">Uncategorized</option>
+          </select>
+        </div>
+
+        <div id="form-actions">
+          <button type="button" id="btn-cancel" class="btn-secondary">Cancel</button>
+          <button type="submit" id="btn-save" class="btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="cat-modal-overlay" class="hidden">
+    <div id="cat-modal">
+      <div id="cat-modal-header">
+        <h2>Manage Categories</h2>
+        <button id="cat-modal-close" class="btn-icon">&times;</button>
+      </div>
+      <div id="cat-modal-body">
+        <div id="cat-list-manage"></div>
+        <div id="cat-add-row">
+          <input type="text" id="cat-new-name" placeholder="Category name" />
+          <input type="color" id="cat-new-color" value="#5b9bd5" />
+          <button id="btn-cat-add" class="btn-secondary">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="context-menu" class="hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['backend\\server.py'],
+    ['server.py'],
     pathex=[],
     binaries=[],
-    datas=[('backend\\db.py', '.'), ('backend\\launcher.py', '.')],
+    datas=[('db.py', '.'), ('launcher.py', '.')],
     hiddenimports=['uvicorn', 'uvicorn.logging', 'uvicorn.loops.auto', 'uvicorn.protocols.http.auto', 'uvicorn.protocols.websockets.auto', 'starlette', 'starlette.applications', 'starlette.routing', 'starlette.middleware', 'starlette.middleware.cors', 'pydantic', 'fastapi', 'fastapi.routing', 'fastapi.openapi', 'anyio', 'sniffio', 'httpx', 'multipart'],
     hookspath=[],
     hooksconfig={},

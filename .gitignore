@@ -7,4 +7,6 @@ dist/
 dist-backend/
 *.exe
 build/
+build/reuse-hub-backend/
 *.spec
+src-electron/node_modules/

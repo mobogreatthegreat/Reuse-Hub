@@ -29,14 +29,15 @@ if %errorlevel% neq 0 (
 
 REM Install Python dependencies
 echo [1/3] Installing Python dependencies...
-python -m pip install -r backend\requirements.txt -q
+python -m pip install -r requirements.txt -q
 if %errorlevel% neq 0 (
     echo [WARN] Failed to install Python deps, trying pip3...
-    pip3 install -r backend\requirements.txt -q
+    pip3 install -r requirements.txt -q
 )
 
 REM Install Node dependencies
 echo [2/3] Installing Node dependencies...
+cd src-electron
 call npm install --silent
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to install Node dependencies.
