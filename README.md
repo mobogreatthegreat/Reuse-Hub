@@ -292,7 +292,7 @@ If you encounter a bug, please [open an issue](https://github.com/mobogreatthegr
 
 ## Transparency
 
-Reuse Hub was developed with assistance from various AI models for parts of the codebase and documentation. The core logic, backend implementation, and build system were written by the project maintainer (@mobogreatthegreat).
+Reuse Hub was developed with assistance from various AI models for parts of the codebase and documentation. The core logic and backend implementation were written by the project maintainer (@mobogreatthegreat).
 
 The Electron framework and FastAPI are open-source projects that power the desktop and backend layers respectively. Reuse Hub is an independent project - all data stays local and no external services are contacted at runtime.
 
