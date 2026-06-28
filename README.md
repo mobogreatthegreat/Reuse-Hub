@@ -5,7 +5,7 @@
     <img src="https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square&logo=python">
   </picture>
   <img src="https://img.shields.io/badge/platform-win-purple?style=flat-square&labelColor=1a1a2e"/>
-  <img src="https://img.shields.io/github/downloads/mobogreatthegreat/Reuse-Hub/total?style=flat-square&color=brightgreen"/>
+  <img src="https://img.shields.io/github/downloads/mobogreatthegreat/Reuse-Hub/total?color=brightgreen"/>
 </p>
 
 <h1 align="center">Reuse Hub</h1>
